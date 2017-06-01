@@ -16,15 +16,15 @@ void PID::Init(double Kp, double Ki, double Kd) {
 }
 
 void PID::UpdateError(double cte) {
-    double proportional = - Kp * cte;
+    p_error = - Kp * cte;
 
     integral += cte;
-    double integral = - Ki * integral;
+    i_error = - Ki * integral;
 
-    double derivative = - Kd * (cte - last_cte);
-    last_cte = cte
+    d_error = - Kd * (cte - last_cte);
+    last_cte = cte;
 }
 
 double PID::TotalError() {
-    return 0.4;
+    return (p_error + i_error + d_error);
 }
