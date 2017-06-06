@@ -21,7 +21,12 @@ public:
   * Defined
   */
   double integral;
-  double last_cte;
+  double last_error;
+  long long int last_timestamp;
+  long long int timestamp;
+  double error;
+  double reference;
+  double delta_K[];
 
   /*
   * Constructor
@@ -36,7 +41,7 @@ public:
   /*
   * Initialize PID.
   */
-  void Init(double Kp_, double Ki_, double Kd_);
+  void Init(double Kprop, double Kint, double Kderiv);
 
   /*
   * Update the PID error variables given cross track error.
