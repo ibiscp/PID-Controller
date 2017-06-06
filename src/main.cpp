@@ -4,6 +4,7 @@
 #include "PID.h"
 #include <math.h>
 #include <chrono>
+#include <fstream>
 
 // for convenience
 using json = nlohmann::json;
@@ -37,16 +38,25 @@ std::string hasData(std::string s) {
 int main() {
     uWS::Hub h;
 
+    // TODO: Initialize the pid
     PID pid;
-    // TODO: Initialize the pid variable.
-    //pid.Init(0.05, 0.0005, 0.6);
-    //pid.Init(0.09, 0.005, 0.05);
 
-    long long int oldTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1) - 80000;
+    // Create file to save history
+    std::ofstream myfile ("..\result.csv");
+    myfile << "Iteration, " << "Twiddle Parameter, " << \
+           "K0, " << "K1, " << "K2, " << \
+           "Delta K0, " << "Delta K1, " << "Delta K2, " << \
+           "Twiddle Tries, " << \
+           "Last Error, " << "Minimum Error\n";
+
+    // Interval of each round
+    int interval = 60000;
+
+    long long int oldTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1) - interval;
     long long int newTime;
     std::vector<string> controller = {"Proportional", "Integral", "Derivative"};
 
-    h.onMessage([&pid, &oldTime, &newTime, &controller](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+    h.onMessage([&pid, &oldTime, &newTime, &controller, &myfile, &interval](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
         // The 2 signifies a websocket event
@@ -63,8 +73,7 @@ int main() {
                     double angle = std::stod(j[1]["steering_angle"].get<std::string>());
                     double steer_value;
                     /*
-                    * TODO: Calculate steering value here, remember the steering value is
-                    * [-1, 1].
+                    * TODO: Calculate steering value here, remember the steering value is [-1, 1].
                     * NOTE: Feel free to play around with the throttle and speed. Maybe use
                     * another PID controller to control the speed!
                     */
@@ -72,19 +81,25 @@ int main() {
                     // Calculate Steering
                     newTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
-                    if (newTime - oldTime >= 60000 && (pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2]) > 1E-6) {
+                    if (newTime - oldTime >= interval && (pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2]) > 1E-6) {
 
-                        if (pid.error_squared[1] > 1E-200){
+                        if (pid.error_squared[1] > 1E-200) {
                             std::cout << "\nLast Error:\t" << pid.error_squared[1] << std::endl;
                             std::cout << "Minimum Error:\t" << min(pid.error_squared[0],pid.error_squared[1]) << std::endl;
+                            myfile << pid.error_squared[1] << ", " << pid.error_squared[0] << "\n";
                         }
 
                         pid.UpdateTwiddle();
 
                         std::cout << "\nIteration: " << pid.iteration << "\t" << controller[pid.twiddle_parameter] << "\n" << std::scientific;
-                        std::cout << "Delta K:\t[" << pid.delta_K[0] << ", " << pid.delta_K[1] << ", " << pid.delta_K[2] << "]\n";
-                        std::cout << "K:\t\t[" << pid.K[0] << ", " << pid.K[1] << ", " << pid.K[2] << "]" << std::endl;
+                        std::cout << "K:\t\t[" << pid.K[0] << ", " << pid.K[1] << ", " << pid.K[2] << "]\n";
+                        std::cout << "Delta K:\t[" << pid.delta_K[0] << ", " << pid.delta_K[1] << ", " << pid.delta_K[2] << "]" << std::endl;
                         std::cout << "Twiddle tries:\t" << pid.twiddle_tries << std::scientific;
+
+                        myfile << pid.iteration << ", " << controller[pid.twiddle_parameter] << ", " << \
+                               pid.K[0] << ", " << pid.K[1] << ", " << pid.K[2] << ", " << \
+                               pid.delta_K[0] << ", " << pid.delta_K[1] << ", " << pid.delta_K[2] << ", " << \
+                               pid.twiddle_tries << ", ";
 
                         oldTime = newTime;
                     }
@@ -97,7 +112,7 @@ int main() {
 
                     // Calculate Throttle
                     double throttle;
-                    double throttle_desired = 0.5 - abs(steer_value) * 0.2;
+                    double throttle_desired = 0.4;// - abs(steer_value) * 0.2;
                     if (speed < throttle_desired*100*0.8)
                         throttle = 1.0;
                     else if (speed > throttle_desired * 100 * 1.2)

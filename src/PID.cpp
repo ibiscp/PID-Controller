@@ -10,10 +10,11 @@ using namespace std;
 
 PID::PID() {
     // Last parameter means that a coefficient is being adjusted
-    delta_K = {0.01, 0.001, 0.01, 0.0};
     //K = {0.13, 0.005, 0.07};
-    K = {0.14, 0.006, 0.07};
-    //K = {0.13, 0.0005, 0.7};
+    //K = {0.14, 0.006, 0.09};
+    K = {0.08, 0.0006, 0.11};
+    delta_K = {K[0] * 0.1, K[1] * 0.1, K[2] * 0.1, 0.0};
+
     error_squared = {1E100, 0.0};
     twiddle_parameter = 0;
     twiddle_tries = 0;
