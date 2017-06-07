@@ -13,8 +13,7 @@ The cost function used was the following:
 cost_function = steering * steering * reference_error * reference_error
 ```
 
-I decided to choose this function to minimize both the reference error and the high steering angles.
-
+This function was chosen in order to minimize both the reference tracking error and the high steering angles.
 
 ## Dependencies
 
