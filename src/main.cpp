@@ -42,7 +42,7 @@ int main() {
     PID pid;
 
     // Create file to save history
-    std::ofstream myfile ("..\result.csv");
+    std::ofstream myfile ("result.csv");
     myfile << "Iteration, " << "Twiddle Parameter, " << \
            "K0, " << "K1, " << "K2, " << \
            "Delta K0, " << "Delta K1, " << "Delta K2, " << \
@@ -81,7 +81,7 @@ int main() {
                     // Calculate Steering
                     newTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
-                    if (newTime - oldTime >= interval && (pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2]) > 1E-6) {
+                    if (newTime - oldTime >= interval && (pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2]) > 1E-3) {
 
                         if (pid.error_squared[1] > 1E-200) {
                             std::cout << "\nLast Error:\t" << pid.error_squared[1] << std::endl;
@@ -103,12 +103,15 @@ int main() {
 
                         oldTime = newTime;
                     }
+                    /*else if(pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2] < 1E-3){
+
+                        std::cout << std::fixed;
+                        std::cout << std::setprecision(3);
+                        std::cout << "CTE: " << cte << " Steering Value: " << steer_value << "\r";
+                    }*/
 
                     pid.UpdateError(cte);
                     steer_value = pid.GetControl();
-
-                    // DEBUG
-                    //std::cout << "CTE: " << cte << " Steering Value: " << steer_value << " Tmestamp: " << (oldTime - newTime) << std::endl;
 
                     // Calculate Throttle
                     double throttle;

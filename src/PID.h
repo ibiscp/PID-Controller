@@ -24,11 +24,12 @@ public:
   int iteration;
   double last_error;
   std::vector<long long int> timestamp;
-  double reference;
   std::vector<double> delta_K;
   std::vector<double> error_squared;
   int twiddle_parameter;
   int twiddle_tries;
+  std::vector<double> reference;
+  double control;
 
   /*
   * Constructor
