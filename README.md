@@ -3,6 +3,19 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Description
+
+PID Controller implemented using Twiddle Algorithm to optimize the parameters.
+
+The cost function used was the following:
+
+```
+cost_function = steering * steering * reference_error * reference_error
+```
+
+I decided to choose this function to minimize both the reference error and the high steering angles.
+
+
 ## Dependencies
 
 * cmake >= 3.5
@@ -28,10 +41,7 @@ Self-Driving Car Engineer Nanodegree Program
 
 ## Basic Build Instructions
 
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./pid`. 
+1. Run it: `./run`. 
 
 ## Editor Settings
 
