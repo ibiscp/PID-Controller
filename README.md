@@ -15,6 +15,12 @@ cost_function = steering * steering * reference_error * reference_error
 
 This function was chosen in order to minimize both the reference tracking error and the high steering angles.
 
+### Effect of each of the P, I, D components
+
+* P - Proportional part - Determines the speed the controller respond to the cross-track error. If the gain ```Kp``` is too large can destabilize or oscilate the system.
+* I -
+* D - 
+
 ## Dependencies
 
 * cmake >= 3.5
