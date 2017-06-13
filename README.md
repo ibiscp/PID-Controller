@@ -5,6 +5,14 @@ Self-Driving Car Engineer Nanodegree Program
 
 ## Description
 
+### Effect of each of the P, I, D components
+
+* P - Proportional part - Determines the speed which the controller responds to the cross-track error. If the gain ```Kp``` is too large, it can destabilize or make the system to oscilate
+* I - Integral part - Sums up the cross-track error over time in order to eliminate the residual steady-state error and eliminate perturbations
+* D - Derivative part - Proportional to the rate of change of the cross-track error, which eliminates the oscillatory behaviour caused by the proportional part
+
+### How the final hyperparameters were chosen
+
 PID Controller implemented using Twiddle Algorithm to optimize the parameters.
 
 The cost function used was the following:
@@ -14,12 +22,6 @@ cost_function = steering * steering * reference_error * reference_error
 ```
 
 This function was chosen in order to minimize both the reference tracking error and the high steering angles.
-
-### Effect of each of the P, I, D components
-
-* P - Proportional part - Determines the speed the controller respond to the cross-track error. If the gain ```Kp``` is too large can destabilize or oscilate the system.
-* I -
-* D - 
 
 ## Dependencies
 
