@@ -52,11 +52,16 @@ int main() {
     // Interval of each round
     int interval = 60000;
 
+    // Twiddle flag
+    // 1 - calibrate
+    // 0 - run
+    bool twiddle = 1;
+
     long long int oldTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1) - interval;
     long long int newTime;
     std::vector<string> controller = {"Proportional", "Integral", "Derivative"};
 
-    h.onMessage([&pid, &oldTime, &newTime, &controller, &myfile, &interval](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+    h.onMessage([&pid, &oldTime, &newTime, &controller, &myfile, &interval, &twiddle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
         // "42" at the start of the message means there's a websocket message event.
         // The 4 signifies a websocket message
         // The 2 signifies a websocket event
@@ -66,6 +71,7 @@ int main() {
 
                 auto j = json::parse(s);
                 std::string event = j[0].get<std::string>();
+
                 if (event == "telemetry") {
                     // j[1] is the data JSON object
                     double cte = std::stod(j[1]["cte"].get<std::string>());
@@ -81,13 +87,14 @@ int main() {
                     // Calculate Steering
                     newTime = std::chrono::system_clock::now().time_since_epoch() / std::chrono::milliseconds(1);
 
-                    if (newTime - oldTime >= interval && (pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2]) > 1E-3) {
+                    if (newTime - oldTime >= interval && (pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2]) > 1E-3 && twiddle) {
 
                         if (pid.error_squared[1] > 1E-200) {
                             std::cout << "\nLast Error:\t" << pid.error_squared[1] << std::endl;
                             std::cout << "Minimum Error:\t" << min(pid.error_squared[0],pid.error_squared[1]) << std::endl;
                             myfile << pid.error_squared[1] << ", " << pid.error_squared[0] << "\n";
                         }
+
 
                         pid.UpdateTwiddle();
 
@@ -102,20 +109,18 @@ int main() {
                                pid.twiddle_tries << ", ";
 
                         oldTime = newTime;
+                        twiddle = 0;
                     }
-                    /*else if(pid.delta_K[0] + pid.delta_K[1] + pid.delta_K[2] < 1E-3){
-
-                        std::cout << std::fixed;
-                        std::cout << std::setprecision(3);
-                        std::cout << "CTE: " << cte << " Steering Value: " << steer_value << "\r";
-                    }*/
+                    else if (!twiddle){
+                        std::cout << "CTE: " << cte << " Steering Value: " << steer_value << endl;
+                    }
 
                     pid.UpdateError(cte);
                     steer_value = pid.GetControl();
 
                     // Calculate Throttle
                     double throttle;
-                    double throttle_desired = 0.4;// - abs(steer_value) * 0.2;
+                    double throttle_desired = 0.3 - abs(steer_value) * 0.05;
                     if (speed < throttle_desired*100*0.8)
                         throttle = 1.0;
                     else if (speed > throttle_desired * 100 * 1.2)

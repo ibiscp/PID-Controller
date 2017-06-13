@@ -12,6 +12,7 @@ PID::PID() {
     K = {0.09, 0.0045, 0.05};
 
     delta_K = {K[0] * 0.1, K[1] * 0.1, K[2] * 0.1, 0.0};    // Last parameter means that a coefficient is being adjusted
+    //delta_K = {0.0, 0.0, 0.0, 0.0};
 
     error_squared = {1E100, 0.0};
     twiddle_parameter = 0;
